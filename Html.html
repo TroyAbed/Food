@@ -1,0 +1,209 @@
+<html>
+<head>
+  <style>
+    /* Dropdown menu styling */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+  display: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* List styling */
+.list {
+  border: 1px solid black;
+  padding: 10px;
+  width: 500px;
+  margin: 10px;
+}
+
+/* Add button styling */
+.add-button {
+  background-color: green;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid green;
+  cursor: pointer;
+}
+
+/* Reset button styling */
+.reset-button {
+  background-color: red;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid red;
+  cursor: pointer;
+}
+
+/* Download button styling */
+.download-button {
+  background-color: blue;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid blue;
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
+  <!-- Dropdown menu -->
+  <div class="dropdown">
+    <input type="text" id="searchInput" onkeyup="filterFunction()">
+    <div class="dropdown-content">
+      <ul id="dropdownList">
+      </ul>
+    </div>
+  </div>
+  <!-- Add button -->
+<button class="add-button" onclick="addItem()">Add</button>
+
+  <!-- List of added items -->
+  <div class="list">
+    <h2>Added items:</h2>
+    <ul id="addedItems">
+    </ul>
+  </div>
+  <!-- Total nutrition information -->
+  <div class="list">
+    <h2>Total:</h2>
+    <p id="totalKcal">Kcal: 0</p>
+    <p id="totalCarbs">Carbs: 0</p>
+    <p id="totalFat">Fat: 0</p>
+    <p id="totalProtein">Protein: 0</p>
+  </div>
+  <!-- Reset button -->
+<button class="reset-button" onclick="resetFunction()">Reset</button>
+
+  <!-- Download button -->
+<button class="download-button" onclick="downloadFunction()">Download</button>
+
+  <script>
+    // List of items
+    var list = [
+      ["Banana", 200, 10, 10, 10, 1],
+      ["Mango", 230, 40, 10, 15, 1]
+    ];
+
+    // Variables to store total values
+    var totalKcal = 0;
+    var totalCarbs = 0;
+    var totalFat = 0;
+    var totalProtein = 0;
+
+    // Populate dropdown menu
+    for (var i = 0; i < list.length;i++) {
+      var item = list[i];
+      var option = document.createElement("LI");
+      option.innerHTML = item[0];
+      option.setAttribute("data-index", i);
+      option.setAttribute("onclick", "selectItem(this)");
+      document.getElementById("dropdownList").appendChild(option);
+}
+    // Filter dropdown menu based on search input
+function filterFunction() {
+  var input = document.getElementById("searchInput").value.toLowerCase();
+  var options = document.getElementById("dropdownList").getElementsByTagName("LI");
+  for (var i = 0; i < options.length; i++) {
+    var option = options[i];
+    if (option.innerHTML.toLowerCase().startsWith(input)) {
+      option.style.display = "block";
+    } else {
+      option.style.display = "none";
+    }
+  }
+}
+
+// Select an item from dropdown menu
+var selectedItem = null;
+function selectItem(option) {
+  selectedItem = option;
+  var index = option.getAttribute("data-index");
+  var input = document.getElementById("searchInput");
+  input.value = list[index][0];
+}
+
+// Add selected item to the list of added items and update total nutrition information
+function addItem() {
+  if (selectedItem == null) {
+    return;
+  }
+  var index = selectedItem.getAttribute("data-index");
+  var item = list[index];
+  var weight = parseInt(prompt("Enter weight in grams:"));
+  if (isNaN(weight)) {
+    return;
+  }
+  var itemKcal = (item[1] * weight) / 100;
+  var itemCarbs = (item[2] * weight) / 100;
+  var itemFat = (item[3] * weight) / 100;
+  var itemProtein = (item[4] * weight) / 100;
+
+  var listItem = document.createElement("LI");
+  listItem.innerHTML = item[0] + ": " + weight + "g";
+  document.getElementById("addedItems").appendChild(listItem);
+
+  totalKcal += itemKcal;
+  totalCarbs += itemCarbs;
+  totalFat += itemFat;
+  totalProtein += itemProtein;
+  document.getElementById("totalKcal").innerHTML = "Kcal: " + totalKcal.toFixed(2);
+  document.getElementById("totalCarbs").innerHTML = "Carbs: " + totalCarbs.toFixed(2);
+  document.getElementById("totalFat").innerHTML = "Fat: " + totalFat.toFixed(2);
+  document.getElementById("totalProtein").innerHTML = "Protein: " + totalProtein.toFixed(2);
+}
+
+// Reset added items and total nutrition information
+function resetFunction() {
+  selectedItem = null;
+  document.getElementById("searchInput").value = "";
+  document.getElementById("addedItems").innerHTML = "";
+  totalKcal = 0;
+  totalCarbs = 0;
+  totalFat = 0;
+  totalProtein = 0;
+document.getElementById("totalKcal").innerHTML = "Kcal: 0";
+document.getElementById("totalCarbs").innerHTML = "Carbs: 0";
+document.getElementById("totalFat").innerHTML = "Fat: 0";
+document.getElementById("totalProtein").innerHTML = "Protein: 0";
+}
+// Download added items as a text file
+function downloadFunction() {
+  var text = "\n\n";
+  var addedItems = document.getElementById("addedItems").getElementsByTagName("LI");
+  for (var i = 0; i < addedItems.length; i++) {
+    var addedItem = addedItems[i].innerHTML.split(": ");
+    var itemName = addedItem[0];
+    var weight = parseInt(addedItem[1].split("g")[0]);
+    var itemIndex = -1;
+    for (var j = 0; j < list.length; j++) {
+      if (list[j][0] == itemName) {
+        itemIndex = j;
+        break;
+      }
+    }
+    var itemKcal = (list[itemIndex][1] * weight) / 100;
+    var itemCarbs = (list[itemIndex][2] * weight) / 100;
+    var itemFat = (list[itemIndex][3] * weight) / 100;
+    var itemProtein = (list[itemIndex][4] * weight) / 100;
+    text += itemName + ":\nWeight: " + weight + "g | Kcal: " + itemKcal.toFixed(2) + " | Carbs: " + itemCarbs.toFixed(2) + " | Fat: " + itemFat.toFixed(2) + " | Protein: " + itemProtein.toFixed(2) + "\n-----------\n";
+  }
+  text += "Total:\nKcal: " + totalKcal.toFixed(2) + " | Carbs: " + totalCarbs.toFixed(2) + " | Fat: " + totalFat.toFixed(2) + " | Protein: " + totalProtein.toFixed(2);
+  var file = new Blob([text], { type: "text/plain" });
+  var a = document.createElement("A");
+  a.href = URL.createObjectURL(file);
+  a.download = "Foodlist.txt";
+  a.click();
+}
+</script>
+</body>
+</html>
